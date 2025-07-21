@@ -46,10 +46,8 @@ def add_book():
     if form.validate_on_submit():
         db.session.add(Book(title=form.name.data,author=form.author.data,rating =float(form.rating.data)))
         db.session.commit()
-        redirect("/")
-        books_titles = Book.query.all()
-        for n in books_titles:
-            print(n.title)
+        return redirect("/")
+
     return render_template("add.html",form = form)
 
 

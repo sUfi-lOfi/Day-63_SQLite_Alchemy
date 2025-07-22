@@ -32,13 +32,12 @@ def home():
     return render_template("index.html",books = Book.query.all())
 
 
-#------------------Form Setup------------------#
+#------------------Add the book Form Setup------------------#
 class AddBook(FlaskForm):
     name = StringField("Book Name ",validators=[DataRequired()])
     author = StringField("Author Name ",validators=[DataRequired()])
     rating = FloatField("Rating ", validators=[DataRequired(),NumberRange(min=0,max=10)])
     submit =  SubmitField("Add Book")
-
 
 @app.route("/add",methods=["POST","GET"])
 def add_book():
@@ -50,8 +49,30 @@ def add_book():
 
     return render_template("add.html",form = form)
 
+#---------Delete the book---------#
+@app.route("/delete?id=<int:book_id>")
+def delete_the_book(book_id):
+    book_to_delete = Book.query.get(book_id)
+    db.session.delete(book_to_delete)
+    db.session.commit()
+    return redirect("/")
 
 
+#-------Edit the Book Rating---------
+
+class EditBookRating(FlaskForm):
+    new_rating = FloatField("Enter the new Rating",validators=[DataRequired(),NumberRange(min=0,max=10)])
+    submit = SubmitField("Edit the Rating")
+
+@app.route("/edit_rating?id=<int:book_id>",methods=["GET","POST"])
+def edit_the_rating(book_id):
+    book = Book.query.get_or_404(book_id)
+    form = EditBookRating()
+    if form.validate_on_submit():
+        book.rating = float(form.new_rating.data)
+        db.session.commit()
+        return redirect("/")
+    return render_template("edit.html",form=form,book_id = book_id)
 
 
 if __name__ == '__main__':
